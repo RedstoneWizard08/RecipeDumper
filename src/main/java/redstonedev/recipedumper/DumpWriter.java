@@ -55,6 +55,6 @@ public class DumpWriter {
     }
 
     public static void writeDump(Object obj, String name) {
-        writeDump(obj, name, false);
+        writeDump(obj, name, true);
     }
 }
