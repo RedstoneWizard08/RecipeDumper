@@ -17,15 +17,15 @@ plugins {
 apply plugin: 'org.spongepowered.mixin'
 
 group = 'redstonedev'
-version = '0.1.0'
+version = '0.2.0'
 
 java {
     archivesBaseName = 'RecipeDumper'
-    toolchain.languageVersion = JavaLanguageVersion.of(8)
+    toolchain.languageVersion = JavaLanguageVersion.of(17)
 }
 
 minecraft {
-    mappings channel: 'snapshot', version: '20210309-1.16.5'
+    mappings channel: 'official', version: '1.19.2'
 
     // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
@@ -48,6 +48,8 @@ minecraft {
 
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
+
+            args 'nogui'
 
             mods {
                 recipedumper {
@@ -74,9 +76,9 @@ minecraft {
 }
 
 mixin {
-    add sourceSets.main, "RecipeDumper.refmap.json"
+    add sourceSets.main, "recipedumper.refmap.json"
 
-    config "RecipeDumper.mixins.json"
+    config "recipedumper.mixins.json"
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
@@ -86,7 +88,7 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.5-36.2.39'
+    minecraft 'net.minecraftforge:forge:1.19.2-43.2.11'
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }

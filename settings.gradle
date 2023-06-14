@@ -5,4 +5,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'RecipeDumper'
+rootProject.name = 'recipedumper'

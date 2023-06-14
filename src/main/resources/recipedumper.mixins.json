@@ -1,9 +1,9 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "redstonedev.RecipeDumper.mixin",
+  "package": "redstonedev.recipedumper.mixin",
   "compatibilityLevel": "JAVA_8",
-  "refmap": "RecipeDumper.refmap.json",
+  "refmap": "recipedumper.refmap.json",
   "mixins": [
   ],
   "client": [

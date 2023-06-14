@@ -1,32 +1,36 @@
 package redstonedev.recipedumper;
 
 import com.google.gson.JsonElement;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.NonNullList;
+
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class RecipeItem {
-    public String id;
+    public ResourceLocation id;
     public int count;
 
-    public RecipeItem(String id, int count) {
+    public RecipeItem(ResourceLocation id, int count) {
         this.id = id;
         this.count = count;
     }
 
     public static RecipeItem fromItemStack(ItemStack stack) {
-        return new RecipeItem(Objects.requireNonNull(stack.getItem().getRegistryName()).toString(), stack.getCount());
+        ResourceLocation loc = ForgeRegistries.ITEMS.getKey(stack.getItem());
+
+        return new RecipeItem(loc, stack.getCount());
     }
 
     public static List<JsonElement> fromIngredients(NonNullList<Ingredient> items) {
         List<JsonElement> ingredients = new ArrayList<>();
 
         for (Ingredient ingredient : items) {
-            ingredients.add(ingredient.serialize());
+            ingredients.add(ingredient.toJson());
         }
 
         return ingredients;

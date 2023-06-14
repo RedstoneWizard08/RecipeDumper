@@ -1,38 +1,41 @@
 package redstonedev.recipedumper;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
-import net.minecraft.command.CommandSource;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.RecipeManager;
-import net.minecraft.resources.DataPackRegistries;
-import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.StringTextComponent;
+
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.*;
-
 public class Dumper {
-    public static int dumpRecipes(CommandContext<CommandSource> ctx) {
-        Minecraft mc = Minecraft.getInstance();
-        IntegratedServer server = Objects.requireNonNull(mc.getIntegratedServer());
-        DataPackRegistries registries = server.getDataPackRegistries();
-        RecipeManager recipeManager = registries.getRecipeManager();
+    public static int dumpRecipes(CommandContext<CommandSourceStack> ctx) {
+        MinecraftServer mc = ctx.getSource().getServer();
+        RecipeManager recipeManager = mc.getRecipeManager();
 
         List<RecipeInfo> recipeInfos = new ArrayList<>();
 
-        for (IRecipe<?> recipe : recipeManager.getRecipes()) {
-            IRecipeType<?> type = recipe.getType();
-            ItemStack out = recipe.getRecipeOutput();
+        for (Recipe<?> recipe : recipeManager.getRecipes()) {
+            RecipeType<?> type = recipe.getType();
+            ItemStack out = recipe.getResultItem();
             NonNullList<Ingredient> ingredients = recipe.getIngredients();
 
             RecipeInfo info = new RecipeInfo();
@@ -44,68 +47,77 @@ public class Dumper {
             recipeInfos.add(info);
         }
 
-        DumpWriter.writeDump(recipeInfos, "recipes");
+        DumpWriter.writeRecipeDump(recipeInfos, "recipes");
 
-        ctx.getSource().sendFeedback(new StringTextComponent("Successfully dumped recipes!"), true);
+        ctx.getSource().sendSystemMessage(Component.literal("Successfully dumped recipes!"));
 
         return 1;
     }
 
-    public static int dumpItemTags(CommandContext<CommandSource> ctx) {
-        Set<Map.Entry<RegistryKey<Item>, Item>> items = ForgeRegistries.ITEMS.getEntries();
-        Map<ResourceLocation, List<String>> tags = new HashMap<>();
+    public static int dumpItemTags(CommandContext<CommandSourceStack> ctx) {
+        Set<Map.Entry<ResourceKey<Item>, Item>> items = ForgeRegistries.ITEMS.getEntries();
+        Map<TagKey<Item>, List<String>> tags = new HashMap<>();
 
-        for (Map.Entry<RegistryKey<Item>, Item> entry : items) {
+        for (Map.Entry<ResourceKey<Item>, Item> entry : items) {
             Item item = entry.getValue();
+            ResourceLocation loc = entry.getKey().location();
+            List<TagKey<Item>> itemTags = ForgeRegistries.ITEMS.tags().getReverseTag(item).get().getTagKeys().toList();
 
-            processTags(tags, item.getRegistryName(), item.getTags());
+            processTags(tags, loc, itemTags);
         }
 
-        DumpWriter.writeDump(tags, "tags/items");
+        DumpWriter.writeTagDump(tags, "tags/items");
 
-        ctx.getSource().sendFeedback(new StringTextComponent("Successfully dumped item tags!"), true);
+        ctx.getSource().sendSystemMessage(Component.literal("Successfully dumped item tags!"));
 
         return 1;
     }
 
-    public static int dumpBlockTags(CommandContext<CommandSource> ctx) {
-        Set<Map.Entry<RegistryKey<Block>, Block>> blocks = ForgeRegistries.BLOCKS.getEntries();
-        Map<ResourceLocation, List<String>> tags = new HashMap<>();
+    public static int dumpBlockTags(CommandContext<CommandSourceStack> ctx) {
+        Set<Map.Entry<ResourceKey<Block>, Block>> blocks = ForgeRegistries.BLOCKS.getEntries();
+        Map<TagKey<Block>, List<String>> tags = new HashMap<>();
 
-        for (Map.Entry<RegistryKey<Block>, Block> entry : blocks) {
+        for (Map.Entry<ResourceKey<Block>, Block> entry : blocks) {
             Block block = entry.getValue();
+            ResourceLocation loc = entry.getKey().location();
+            List<TagKey<Block>> blockTags = ForgeRegistries.BLOCKS.tags().getReverseTag(block).get().getTagKeys()
+                    .toList();
 
-            processTags(tags, block.getRegistryName(), block.getTags());
+            processTags(tags, loc, blockTags);
         }
 
-        DumpWriter.writeDump(tags, "tags/blocks");
+        DumpWriter.writeTagDump(tags, "tags/blocks");
 
-        ctx.getSource().sendFeedback(new StringTextComponent("Successfully dumped block tags!"), true);
+        ctx.getSource().sendSystemMessage(Component.literal("Successfully dumped block tags!"));
 
         return 1;
     }
 
-    public static int dumpFluidTags(CommandContext<CommandSource> ctx) {
-        Set<Map.Entry<RegistryKey<Fluid>, Fluid>> fluids = ForgeRegistries.FLUIDS.getEntries();
-        Map<ResourceLocation, List<String>> tags = new HashMap<>();
+    public static int dumpFluidTags(CommandContext<CommandSourceStack> ctx) {
+        Set<Map.Entry<ResourceKey<Fluid>, Fluid>> fluids = ForgeRegistries.FLUIDS.getEntries();
+        Map<TagKey<Fluid>, List<String>> tags = new HashMap<>();
 
-        for (Map.Entry<RegistryKey<Fluid>, Fluid> entry : fluids) {
+        for (Map.Entry<ResourceKey<Fluid>, Fluid> entry : fluids) {
             Fluid fluid = entry.getValue();
+            ResourceLocation loc = entry.getKey().location();
+            List<TagKey<Fluid>> fluidTags = ForgeRegistries.FLUIDS.tags().getReverseTag(fluid).get().getTagKeys()
+                    .toList();
 
-            processTags(tags, fluid.getRegistryName(), fluid.getTags());
+            processTags(tags, loc, fluidTags);
         }
 
-        DumpWriter.writeDump(tags, "tags/fluids");
+        DumpWriter.writeTagDump(tags, "tags/fluids");
 
-        ctx.getSource().sendFeedback(new StringTextComponent("Successfully dumped fluid tags!"), true);
+        ctx.getSource().sendSystemMessage(Component.literal("Successfully dumped fluid tags!"));
 
         return 1;
     }
 
-    public static void processTags(Map<ResourceLocation, List<String>> resourceTags, ResourceLocation registryName, Set<ResourceLocation> tags) {
+    public static <T> void processTags(Map<TagKey<T>, List<String>> resourceTags, ResourceLocation registryName,
+            List<TagKey<T>> tags) {
         ResourceLocation id = Objects.requireNonNull(registryName);
 
-        for (ResourceLocation tag : tags) {
+        for (TagKey<T> tag : tags) {
             if (!resourceTags.containsKey(tag))
                 resourceTags.put(tag, new ArrayList<>());
 
@@ -113,10 +125,17 @@ public class Dumper {
         }
     }
 
-    public static int dumpAllTags(CommandContext<CommandSource> ctx) {
+    public static int dumpAllTags(CommandContext<CommandSourceStack> ctx) {
         dumpItemTags(ctx);
         dumpBlockTags(ctx);
         dumpFluidTags(ctx);
+
+        return 1;
+    }
+
+    public static int dumpAll(CommandContext<CommandSourceStack> ctx) {
+        dumpRecipes(ctx);
+        dumpAllTags(ctx);
 
         return 1;
     }
