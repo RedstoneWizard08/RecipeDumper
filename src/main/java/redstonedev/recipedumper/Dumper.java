@@ -35,7 +35,7 @@ public class Dumper {
 
         for (Recipe<?> recipe : recipeManager.getRecipes()) {
             RecipeType<?> type = recipe.getType();
-            ItemStack out = recipe.getResultItem();
+            ItemStack out = recipe.getResultItem(mc.registryAccess());
             NonNullList<Ingredient> ingredients = recipe.getIngredients();
 
             RecipeInfo info = new RecipeInfo();
