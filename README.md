@@ -15,6 +15,6 @@ A handy tool to dump recipes from Minecraft.
 
 Outputs will be in `[game directory]/dumps/`.
 
-## Notes:
+## Notes
 
-If the Modrinth link doesn't work, that just means the project isn't approved yet.
+If the Modrinth link doesn't work, that just means the project is still under review.
