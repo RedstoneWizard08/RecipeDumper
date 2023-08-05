@@ -14,7 +14,3 @@ A handy tool to dump recipes from Minecraft.
   - `/dump all`: Dump all tags.
 
 Outputs will be in `[game directory]/dumps/`.
-
-## Notes
-
-If the Modrinth link doesn't work, that just means the project is still under review.
