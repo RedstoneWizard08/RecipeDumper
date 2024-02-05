@@ -14,3 +14,11 @@ A handy tool to dump recipes from Minecraft.
   - `/dump all`: Dump all tags.
 
 Outputs will be in `[game directory]/dumps/`.
+
+## Future Plans
+
+In the future (as I am coming back to this), I plan to:
+
+- [ ] Port to Architectury
+- [ ] Support at least 1.18 through 1.20.5 (and 1.21)
+- [ ] Make a web service to view recipes and tags (including recipes for mods like Create and Mekanism), and calculate base requirements
