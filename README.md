@@ -40,6 +40,19 @@ In the future (as I am coming back to this), I plan to:
 The structure will be as follows:
 
 ```txt
+/*
+enum MaterialType {
+    // These are shorts
+
+    Item = 0,
+    Block = 1,
+    Fluid = 2,
+    
+    // This will only be present if Mekanism is found
+    Gas = 3,
+}
+*/
+
 // Header
 (in ASCII hex) RDMP\0 // Magic
 (shorts) 1 0 0\0 // Version
@@ -51,19 +64,67 @@ IIDX\0
     (string) [item id]\0
 IEND\0
 
+// Fluid index
+FIDX\0
+    // Repeated
+    (int32) [index in array]\0
+    (string) [fluid id]\0
+FEND\0
+
+// Gas index (Mekanism only)
+GIDX\0
+    // Repeated
+    (int32) [index in array]\0
+    (string) [gas id]\0
+GEND\0
+
 // Tag Index
 TIDX\0
     // Repeated
-    ITEM\0
+    ELEM\0
         (int32) [index in array]\0
-        (string) [item id]\0
+        (string) [tag id]\0
+        (enum: MaterialType [as short]) [tag type]\0
 
         // Tag members
-        (list<int32>) [item indexes in items array]\0
-    MEND\0
+        (list<int32>) [material indexes in their array]\0
+    EEND\0
 IEND\0
 
-// TODO: Recipe Index
+// Recipe Index
+RIDX\0
+    // Repeated
+    ELEM\0
+        (int32) [index in array]\0
+
+        // Inputs
+        SECT\0
+            RIN\0
+                (enum: MaterialType [as short]) [material type]\0
+                (int32) [material index in its array]\0
+            NEND\0
+        SEND\0
+
+        // Outputs
+        SECT\0
+            ROUT\0
+                (enum: MaterialType [as short]) [material type]\0
+                (int32) [material index in its array]\0
+            OEND\0
+        SEND\0
+    EEND\0
+REND\0
+
+// Recipe Type Map
+RMAP\0
+    // Repeated
+    ELEM\0
+        (string) [recipe type id]\0 // The recipe type is the key in the map
+
+        // Values
+        (list<int32>) [recipe indexes in recipes array]\0
+    EEND\0
+MEND\0
 
 EOF
 ```
