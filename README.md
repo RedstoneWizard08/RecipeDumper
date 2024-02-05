@@ -20,5 +20,53 @@ Outputs will be in `[game directory]/dumps/`.
 In the future (as I am coming back to this), I plan to:
 
 - [ ] Port to Architectury
-- [ ] Support at least 1.18 through 1.20.5 (and 1.21)
+- [ ] Support at least 1.16 through 1.20.5 (and 1.21)
 - [ ] Make a web service to view recipes and tags (including recipes for mods like Create and Mekanism), and calculate base requirements
+- [ ] Have the web service include pre-dumped files for modpacks (listed below)
+- [ ] Make a compressed binary representation for large amounts of data
+
+### Future Plans - Modpacks
+
+- Vanilla Minecraft - 1.16 to 1.20 (not a modpack)
+- Create: Mekanized
+- Create: Above & Beyond
+- Enigmatica 6: Expert
+- Create: Astral
+- Greate: Beyond the Horizon
+- ... and more!
+
+### Future Plans - Binary Representation
+
+The structure will be as follows:
+
+```txt
+// Header
+(in ASCII hex) RDMP\0 // Magic
+(shorts) 1 0 0\0 // Version
+
+// Item Index
+IIDX\0
+    // Repeated
+    (int32) [index in array]\0
+    (string) [item id]\0
+IEND\0
+
+// Tag Index
+TIDX\0
+    // Repeated
+    ITEM\0
+        (int32) [index in array]\0
+        (string) [item id]\0
+
+        // Tag members
+        (list<int32>) [item indexes in items array]\0
+    MEND\0
+IEND\0
+
+// TODO: Recipe Index
+
+EOF
+```
+
+All strings are null-terminated and all numbers are in little endian format.
+
