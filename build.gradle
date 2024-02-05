@@ -1,114 +1,54 @@
-buildscript {
-    repositories {
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+plugins {
+    id "architectury-plugin" version "3.4-SNAPSHOT"
+    id "dev.architectury.loom" version "1.3-SNAPSHOT" apply false
+}
 
-        mavenCentral()
+architectury {
+    minecraft = rootProject.minecraft_version
+}
+
+subprojects {
+    apply plugin: "dev.architectury.loom"
+
+    loom {
+        silentMojangMappingsLicense()
     }
 
     dependencies {
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+        // The following line declares the mojmap mappings, you may use other mappings as well
+        mappings loom.officialMojangMappings()
+        // The following line declares the yarn mappings you may select this one as well.
+        // mappings "net.fabricmc:yarn:1.19.2+build.28:v2"
     }
 }
 
-plugins {
-    id 'net.minecraftforge.gradle' version '5.1.+'
-}
+allprojects {
+    apply plugin: "java"
+    apply plugin: "architectury-plugin"
+    apply plugin: "maven-publish"
 
-apply plugin: 'org.spongepowered.mixin'
-
-group = 'redstonedev'
-version = '0.3.0'
-
-java {
-    archivesBaseName = 'RecipeDumper'
-    toolchain.languageVersion = JavaLanguageVersion.of(17)
-}
-
-minecraft {
-    mappings channel: 'official', version: '1.20.1'
-
-    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-
-    runs {
-        client {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                recipedumper {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        server {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-
-            args 'nogui'
-
-            mods {
-                recipedumper {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        data {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-
-            args '--mod', 'recipedumper', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-
-            mods {
-                recipedumper {
-                    source sourceSets.main
-                }
-            }
-        }
+    base {
+        archivesName = rootProject.archives_base_name
     }
-}
 
-mixin {
-    add sourceSets.main, "recipedumper.refmap.json"
+    version = rootProject.mod_version
+    group = rootProject.maven_group
 
-    config "recipedumper.mixins.json"
-}
-
-sourceSets.main.resources { srcDir 'src/generated/resources' }
-
-repositories {
-
-}
-
-dependencies {
-    minecraft 'net.minecraftforge:forge:1.20.1-47.1.43'
-
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-}
-
-jar {
-    manifest {
-        attributes([
-                "Specification-Title"     : "recipedumper",
-                "Specification-Vendor"    : "RedstoneWizard08",
-                "Specification-Version"   : "1",
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : project.jar.archiveVersion,
-                "Implementation-Vendor"   : "RedstoneWizard08",
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ])
+    repositories {
+        // Add repositories to retrieve artifacts from in here.
+        // You should only use this when depending on other mods because
+        // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
+        // See https://docs.gradle.org/current/userguide/declaring_repositories.html
+        // for more information about repositories.
     }
-}
 
-jar.finalizedBy('reobfJar')
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+        options.release = 17
+    }
 
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
+    java {
+        withSourcesJar()
+    }
 }

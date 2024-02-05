@@ -9,13 +9,19 @@ import java.util.Set;
 
 import com.mojang.brigadier.context.CommandContext;
 
+import dev.architectury.registry.registries.Registries;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.data.tags.TagsProvider;
+import net.minecraft.data.tags.TagsProvider.TagLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.TagKey;
+import net.minecraft.tags.TagManager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -24,7 +30,6 @@ import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.registries.ForgeRegistries;
 
 public class Dumper {
     public static int dumpRecipes(CommandContext<CommandSourceStack> ctx) {
@@ -35,7 +40,7 @@ public class Dumper {
 
         for (Recipe<?> recipe : recipeManager.getRecipes()) {
             RecipeType<?> type = recipe.getType();
-            ItemStack out = recipe.getResultItem(mc.registryAccess());
+            ItemStack out = recipe.getResultItem();
             NonNullList<Ingredient> ingredients = recipe.getIngredients();
 
             RecipeInfo info = new RecipeInfo();
@@ -55,12 +60,13 @@ public class Dumper {
     }
 
     public static int dumpItemTags(CommandContext<CommandSourceStack> ctx) {
-        Set<Map.Entry<ResourceKey<Item>, Item>> items = ForgeRegistries.ITEMS.getEntries();
+        Set<Map.Entry<ResourceKey<Item>, Item>> items = Registry.ITEM.entrySet();
         Map<TagKey<Item>, List<String>> tags = new HashMap<>();
 
         for (Map.Entry<ResourceKey<Item>, Item> entry : items) {
             Item item = entry.getValue();
             ResourceLocation loc = entry.getKey().location();
+            
             List<TagKey<Item>> itemTags = ForgeRegistries.ITEMS.tags().getReverseTag(item).get().getTagKeys().toList();
 
             processTags(tags, loc, itemTags);
@@ -74,7 +80,7 @@ public class Dumper {
     }
 
     public static int dumpBlockTags(CommandContext<CommandSourceStack> ctx) {
-        Set<Map.Entry<ResourceKey<Block>, Block>> blocks = ForgeRegistries.BLOCKS.getEntries();
+        Set<Map.Entry<ResourceKey<Block>, Block>> blocks = Registry.BLOCK.entrySet();
         Map<TagKey<Block>, List<String>> tags = new HashMap<>();
 
         for (Map.Entry<ResourceKey<Block>, Block> entry : blocks) {
@@ -94,7 +100,7 @@ public class Dumper {
     }
 
     public static int dumpFluidTags(CommandContext<CommandSourceStack> ctx) {
-        Set<Map.Entry<ResourceKey<Fluid>, Fluid>> fluids = ForgeRegistries.FLUIDS.getEntries();
+        Set<Map.Entry<ResourceKey<Fluid>, Fluid>> fluids = Registry.FLUIDS.entrySet();
         Map<TagKey<Fluid>, List<String>> tags = new HashMap<>();
 
         for (Map.Entry<ResourceKey<Fluid>, Fluid> entry : fluids) {

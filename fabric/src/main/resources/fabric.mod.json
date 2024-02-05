@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "recipedumper",
+  "version": "${version}",
+  "name": "RecipeDumper",
+  "description": "A simple utility for dumping recipes and tags.",
+  "authors": [
+    "RecipeDumper"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/recipedumper",
+    "sources": "https://github.com/RedstoneWizard08/RecipeDumper"
+  },
+  "license": "MIT",
+  "icon": "assets/recipedumper/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "redstonedev.recipedumper.fabric.RecipeDumperFabric"
+    ]
+  },
+  "mixins": [
+    "recipedumper.mixins.json",
+    "recipedumper-common.mixins.json"
+  ],
+  "depends": {
+    "fabric": "*",
+    "minecraft": ">=1.19.2",
+    "architectury": ">=6.5.85"
+  }
+}
